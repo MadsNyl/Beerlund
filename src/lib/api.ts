@@ -1,6 +1,6 @@
 import type { EventListResponse, EventResponse } from "@/types";
 
-const API_URL = import.meta.env.API_URL || "http://localhost:8000";
+const API_URL = import.meta.env.API_URL || "https://api.beerlund.com";
 
 export async function fetchEvents(
   page: number,
