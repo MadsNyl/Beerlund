@@ -12,7 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 const EventsPage = () => {
   const [filter, setFilter] = useState<boolean>(false);
 
-  const { data, isLoading, error } = useEvents(1, 20, filter);
+  const { data, isLoading } = useEvents(1, 20, filter);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50">
