@@ -1,14 +1,18 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, MapPin, Users, Clock, Images } from "lucide-react";
+import { Calendar, MapPin, Users, Clock, Trophy, Medal, Award } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useEvent } from "@/hooks/useEvent";
 import { useJoinEvent } from "@/hooks/useJoinEvent";
 import { SignInButton, useAuth } from "@clerk/clerk-react";
 import { useLeaveEvent } from "@/hooks/useLeaveEvent";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import type { LeaderboardEntry, Participant } from "@/types";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { formatDuration } from "@/lib/utils";
 
 const EventDetails = () => {
   const { id } = useParams();
@@ -266,22 +270,51 @@ const EventDetails = () => {
                       <p className="text-sm text-gray-600">Lokasjon</p>
                     </div>
                   </div>
-                  
-                  <div className="pt-4 border-t border-gray-200">
-                    <Link to={`/events/${id}/gallery`}>
-                      <Button variant="outline" className="w-full border-2 border-amber-600 text-amber-700 hover:bg-amber-50 font-semibold py-3 rounded-xl transition-all duration-300">
-                        <Images className="h-4 w-4 mr-2" />
-                        Se bildegalleri
-                      </Button>
-                    </Link>
+
+                  <div className="pt-4 border-t border-gray-200 space-y-3">
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" className="w-full border-2 border-amber-600 text-amber-700 hover:bg-amber-50 font-semibold py-3 rounded-xl transition-all duration-300">
+                          <Users className="h-4 w-4 mr-2" />
+                          Se alle deltakere
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-2xl max-h-[70vh] overflow-y-auto">
+                        <DialogHeader>
+                          <DialogTitle className="text-2xl font-bold text-gray-900">
+                            Deltakere - {event.name}
+                          </DialogTitle>
+                        </DialogHeader>
+                        <div className="mt-6">
+                          <p className="text-gray-600 mb-4">
+                            {event.participants.length || 0} påmeldte deltakere
+                          </p>
+                          <div className="space-y-2">
+                            {event.participants.map((participant: Participant, index: number) => (
+                              <div key={index} className="flex items-center justify-between p-3 bg-amber-50 rounded-lg border border-amber-200">
+                                <div>
+                                  <p className="font-semibold text-gray-900">{participant.user.first_name} {participant.user.last_name}</p>
+                                </div>
+                                <div className="text-right">
+                                  <p className="text-sm text-gray-500">
+                                    Påmeldt: {new Date(participant.created_at).toLocaleDateString('nb-NO')}
+                                  </p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                   </div>
+                  
                 </CardContent>
               </Card>
             </div>
           </div>
 
           {/* Results Section */}
-          {/* {event.status === "finished" && event.results && (
+          {event.leaderboard.length > 0 && (
             <div className="mt-16">
               <Card className="bg-white/70 backdrop-blur-sm border-white/20 shadow-xl">
                 <CardHeader className="text-center">
@@ -297,23 +330,23 @@ const EventDetails = () => {
                         <TableHead className="text-center">Plass</TableHead>
                         <TableHead>Navn</TableHead>
                         <TableHead>Tid</TableHead>
-                        <TableHead>By</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {event.results.map((result: any) => (
-                        <TableRow key={result.place} className="hover:bg-amber-50/50">
+                      {event.leaderboard.map((result: LeaderboardEntry, index: number) => (
+                        <TableRow key={index} className="hover:bg-amber-50/50">
                           <TableCell className="text-center">
                             <div className="flex items-center justify-center">
-                              {result.place === 1 && <Trophy className="h-6 w-6 text-amber-500 mr-2" />}
-                              {result.place === 2 && <Medal className="h-6 w-6 text-gray-400 mr-2" />}
-                              {result.place === 3 && <Award className="h-6 w-6 text-amber-600 mr-2" />}
-                              <span className="font-bold text-lg">{result.place}</span>
+                              {result.rank === 1 && <Trophy className="h-6 w-6 text-amber-500 mr-2" />}
+                              {result.rank === 2 && <Medal className="h-6 w-6 text-gray-400 mr-2" />}
+                              {result.rank === 3 && <Award className="h-6 w-6 text-amber-600 mr-2" />}
+                              <span className="font-bold text-lg">{result.rank}</span>
                             </div>
                           </TableCell>
-                          <TableCell className="font-semibold text-gray-900">{result.name}</TableCell>
-                          <TableCell className="font-mono text-lg font-bold text-amber-600">{result.time}</TableCell>
-                          <TableCell className="text-gray-600">{result.city}</TableCell>
+                          <TableCell className="font-semibold text-gray-900">{result.user.first_name} {result.user.last_name}</TableCell>
+                          <TableCell className="font-mono text-lg font-bold text-amber-600">
+                            {formatDuration(result.score)}
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -321,7 +354,7 @@ const EventDetails = () => {
                 </CardContent>
               </Card>
             </div>
-          )} */}
+          )}
         </div>
       </main>
 

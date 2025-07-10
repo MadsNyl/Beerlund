@@ -1,3 +1,4 @@
+import type { LeaderboardEntry } from "./leaderboard";
 import type { Participant } from "./participant";
 
 export interface EventList {
@@ -35,5 +36,6 @@ export interface EventResponse {
   image_url: string;
   max_participants: number;
   participants: Participant[];
+  leaderboard: LeaderboardEntry[];
 }
 
