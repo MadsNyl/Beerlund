@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import type { LeaderboardEntry, Participant } from "@/types";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatDuration } from "@/lib/utils";
+import MarkdownRenderer from "@/components/MarkdownRenderer";
 
 const EventDetails = () => {
   const { id } = useParams();
@@ -61,27 +62,6 @@ const EventDetails = () => {
   }
 
   const isParticipant = userId && event.participants.some(participant => participant.user_id === userId);
-
-  // Simple markdown-like parsing
-  const parseMarkdown = (text: string) => {
-    return text
-      .split('\n')
-      .map((line, index) => {
-        if (line.startsWith('# ')) {
-          return <h1 key={index} className="text-3xl font-bold text-gray-900 mb-6 mt-8 first:mt-0">{line.substring(2)}</h1>;
-        }
-        if (line.startsWith('## ')) {
-          return <h2 key={index} className="text-2xl font-semibold text-gray-800 mb-4 mt-6">{line.substring(3)}</h2>;
-        }
-        if (line.startsWith('- ')) {
-          return <li key={index} className="text-gray-600 mb-2 ml-4">{line.substring(2)}</li>;
-        }
-        if (line.trim() === '') {
-          return <br key={index} />;
-        }
-        return <p key={index} className="text-gray-600 mb-4 leading-relaxed">{line}</p>;
-      });
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50">
@@ -153,9 +133,7 @@ const EventDetails = () => {
             {/* Main Content */}
             <div className="lg:col-span-2">
               <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-white/20">
-                <div className="prose prose-lg max-w-none">
-                  {parseMarkdown(event.description)}
-                </div>
+                <MarkdownRenderer content={event.description} />
               </div>
             </div>
 
@@ -175,7 +153,11 @@ const EventDetails = () => {
                     </div>
                     <p className="text-gray-600">påmeldte deltakere</p>
                   </div>
-                  {!userId
+                  {event.start_time < new Date().toISOString() ?
+                    <p className="text-center text-red-600 font-semibold">
+                      Arrangementet er ikke lenger åpent for påmelding.
+                    </p>
+                  : !userId
                    ? (
                     <SignInButton>
                       <Button
